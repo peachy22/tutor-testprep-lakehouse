@@ -1,0 +1,36 @@
+id,name,modifier,category1,category2
+3,Algebra I,Regents,Math,STEM
+6,Algebra I,Grade,Math,STEM
+9,Algebra II,Regents,Math,STEM
+12,Algebra II,Grade,Math,STEM
+15,Geometry,Regents,Math,STEM
+18,Geometry,Grade,Math,STEM
+24,Precalculus,Grade,Math,STEM
+25,Calculus,AP,Math,STEM
+30,Calculus,Grade,Math,STEM
+32,Math,IB,Math,STEM
+34,Math,SAT,Math,STEM
+35,Math,ACT,Math,STEM
+36,Math,Grade,Math,STEM
+37,Chemistry,AP,Science,STEM
+38,Chemistry,IB,Science,STEM
+39,Chemistry,Regents,Science,STEM
+42,Chemistry,Grade,Science,STEM
+43,Physics,AP,Science,STEM
+44,Physics,IB,Science,STEM
+45,Physics,Regents,Science,STEM
+48,Physics,Grade,Science,STEM
+49,Social Studies,AP,Humanities,Humanities
+51,Social Studies,Regents,Humanities,Humanities
+54,Social Studies,Grade,Humanities,Humanities
+55,Language Arts,AP,Humanities,Humanities
+56,Language Arts,IB,Humanities,Humanities
+57,Language Arts,Regents,Humanities,Humanities
+58,Language Arts,SAT,Humanities,Humanities
+59,Language Arts,ACT,Humanities,Humanities
+60,Language Arts,Grade,Humanities,Humanities
+61,Foreign Language,AP,Humanities,Humanities
+66,Foreign Language,Grade,Humanities,Humanities
+69,Science,Regents,Science,STEM
+71,Science,ACT,Science,STEM
+72,Science,Grade,Science,STEM
