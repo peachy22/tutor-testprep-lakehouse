@@ -6,9 +6,9 @@ import os
 
 # declare start date, end date, and number of students for the first tutor in week 1
 
-sim_start = datetime(2020,8,23,0,0,1)
+sim_start = datetime(2021,8,23,0,0,0)
 sim_end = datetime(2027,12,31,0,0,0)
-hist_cutoff = datetime(2025,12,19,0,0,0)
+hist_cutoff = datetime(2025,12,20,0,0,0)
 students_week_1 = 10
 
 
@@ -32,7 +32,7 @@ def week_1(sim_start,sim_end,students_week_1):
             first_name = random.choice(GIRL_NAMES)
         last_name = random.choice(LAST_NAMES)
         students.loc[len(students)] = [student_count,first_name,last_name,sex,dob.date(),grade_level,"Active",80,sim_start,sim_start]
-        students_helpers.loc[len(students_helpers)] = [student_count,random.choice([5,6]),random.choice(range(1,30)),1]
+        students_helpers.loc[len(students_helpers)] = [student_count,random.choice([5,6]),random.choice(range(1,30)),1,9]
         tutors.loc[tutors["tutor_id"] == 0, "active_students"] += 1
         student_count += 1
         active_student_count += 1
@@ -56,7 +56,8 @@ def create_new_student(business_day,new_student_multiplier,student_count, active
         first_session_hour = random.choice(range(13,19))
         created = datetime(business_day.year, business_day.month, business_day.day, first_session_hour, 0, 0)
         age = grade_level + 6
-        dob = (business_day + timedelta(days = random.randint(-365,365))) - timedelta(days=365*age)
+        birth_year = business_day.year - age
+        dob = datetime(birth_year,random.randint(1, 12),random.randint(1, 28))
         sex = random.choices(['M','F'],[.39,.61],k=1)[0]
         if business_day.year - sim_start.year < 2:
             contract = 80
@@ -70,7 +71,7 @@ def create_new_student(business_day,new_student_multiplier,student_count, active
             first_name = random.choice(GIRL_NAMES)
         last_name = random.choice(LAST_NAMES)
         students.loc[len(students)] = [student_count,first_name,last_name,sex,dob.date(),grade_level,"Active",contract,created,created]
-        students_helpers.loc[len(students_helpers)] = [student_count,random.choice([5,6]),random.choice(range(1,30)),0]
+        students_helpers.loc[len(students_helpers)] = [student_count,random.choice([5,6]),random.choice(range(1,30)),0,random.choice([9,10,11])]
         i = i + 1
         student_count += 1
         active_student_count += 1
@@ -133,6 +134,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
         student_is_returnable = student_helper["returnable"].iloc[0]
         summer_cutoff_month = student_helper["summer_cutoff_month"].iloc[0]
         summer_cutoff_day = student_helper["summer_cutoff_day"].iloc[0]
+        school_year_start_month = student_helper["school_year_start_month"].iloc[0]
         if student_id not in sessions_i["student_id"].values:
             eligible = tutors.loc[tutors["active_students"] < student_tutor_ratio, "tutor_id"].tolist()
             if eligible:
@@ -181,13 +183,14 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
                     sessions.loc[len(sessions)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,status]
                     sessions_f.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,status]
                     session_count += 1
-        elif row["status"] == "Inactive" and row["grade"] < 12 and student_is_returnable == 1 and ((business_day.month == 9 and random.random() < 0.04) or (business_day.month == 10 and random.random() < 0.03) or (business_day.month == 11 and random.random() < 0.02) or (business_day.month == 12 and random.random() < 0.01)):
+            continue
+        elif row["status"] == "Inactive" and row["grade"] < 12 and student_is_returnable == 1 and business_day.month == school_year_start_month and random.random() < .04:
             students.loc[students["student_id"] == student_id, "status"] = 'Active'
             students.loc[students["student_id"] == student_id, "grade"] += 1
             students.loc[students["student_id"] == student_id, "updated"] = business_day
             last_session = sessions_f[sessions_f["student_id"] == student_id]
             last_tutor = last_session["tutor_id"].iloc[0]
-            preferred_tutor = tutors.loc[(tutors["active_students"] < student_tutor_ratio + 8) & (tutors["tutor_id"] == last_tutor), "tutor_id"].tolist()
+            preferred_tutor = tutors.loc[(tutors["active_students"] < student_tutor_ratio) & (tutors["tutor_id"] == last_tutor), "tutor_id"].tolist()
             eligible_tutors = tutors.loc[tutors["active_students"] < student_tutor_ratio, "tutor_id"].tolist()
             if preferred_tutor:
                 tutor_id = preferred_tutor[0]
@@ -201,10 +204,12 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
             session_hour = random.choice(range(13,19))
             stamp = datetime(curr_session_date.year, curr_session_date.month, curr_session_date.day, session_hour, 0, 0)
             sessions.loc[len(sessions)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
-            sessions_f.loc[len(sessions_f)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
+            sessions_i.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
+            sessions_f.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
             tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] += 1
             session_count += 1
             active_student_count += 1
+            continue
     return tutor_count, student_count, active_student_count, session_count
 
     # function for creating loopable date boundaries after week 1
@@ -231,7 +236,8 @@ if __name__ == "__main__":
     students_helpers = pd.DataFrame({'student_id':[],
                          'summer_cutoff_month':[],
                          'summer_cutoff_day':[],
-                         'returnable':[]})
+                         'returnable':[],
+                         'school_year_start_month':[]})
 
     #tutors
     tutors = pd.DataFrame({'tutor_id':[],
@@ -291,7 +297,8 @@ if __name__ == "__main__":
     students_helpers.to_csv('src/simulation/students_helpers.csv', index=False)
 
 # write clean pre-migration history to raw
-    ingest_date_folder = f"ingest_date={hist_cutoff.strftime('%Y-%m-%d')}"
+    ingest_date = max(sessions_f["stamp"]).date() + timedelta(days=1)
+    ingest_date_folder = f"ingest_date={ingest_date.strftime('%Y-%m-%d')}"
 
     os.makedirs(f"data/raw/students/{ingest_date_folder}", exist_ok=True)
     students_path = f"data/raw/students/{ingest_date_folder}/students.csv"
