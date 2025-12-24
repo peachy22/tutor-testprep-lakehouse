@@ -66,7 +66,7 @@ def create_new_tutor(tutor_count):
     else:
         first_name = random.choice(GIRL_NAMES)
     last_name = random.choice(LAST_NAMES)
-    dob = (datetime.today() + timedelta(days = random.randint(-365,365))) - timedelta(days=365*age)
+    dob = (datetime.today() + timedelta(days = random.randint(-600,0))) - timedelta(days=365*age)
     created = max(students["created"])
     tutors.loc[len(tutors)] = [tutor_id, first_name, last_name, sex, dob.date(), contract, 0, created, created]
     tutor_count += 1
@@ -85,9 +85,8 @@ def stochastic_churn(business_day, sim_start, sim_end, season):
     new_student_prob = base_prob + noise
     new_student_prob = max(0, min(1, new_student_prob))
     base_mult = 1 + 2 * progress
-    mult_noise = random.uniform(0.9, 1.1)  
-    new_student_multiplier = base_mult * mult_noise
-    new_student_multiplier = max(1, new_student_multiplier)
+    new_student_multiplier = int(base_mult)
+    new_student_multiplier = random.choice([1, new_student_multiplier])
     base_churn = 0.0044
     churn_noise = random.uniform(0.8, 1.2)
     stochastic_churn_prob = base_churn * churn_noise
@@ -131,6 +130,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
             sessions_f.loc[len(sessions_f)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
             students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = student_is_returnable
             tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] += 1
+            tutors.loc[tutors["tutor_id"] == tutor_id, "updated"] = business_day
             session_count += 1
             continue
         elif row["status"] == "Active":
@@ -151,6 +151,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
                     if (last_session_date > date(curr_session_year,summer_cutoff_month,summer_cutoff_day) and subject_id != 1):
                         students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = 1
                     tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] -= 1
+                    tutors.loc[tutors["tutor_id"] == tutor_id, "updated"] = business_day
                     active_student_count -= 1
                 else:
                     last_session_hour = last_session["stamp"].iloc[0].hour
@@ -185,6 +186,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
             sessions_i.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
             sessions_f.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
             tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] += 1
+            tutors.loc[tutors["tutor_id"] == tutor_id, "updated"] = stamp
             session_count += 1
             active_student_count += 1
             continue
@@ -253,6 +255,8 @@ students_delta["change_type"] = np.where(
     students_delta["created"] == students_delta["updated"],
     "INSERT",
     "UPDATE")
+students_delta["source_batch_id"] = f"sim_{ingest_stamp.date()}"
+students_delta["ingest_ts"] = ingest_stamp + timedelta(milliseconds=random.randint(1,500))
 os.makedirs(f"data/raw/students/{ingest_date_folder}", exist_ok=True)
 students_delta_path = f"data/raw/students/{ingest_date_folder}/students_delta.csv"
 students_delta.to_csv(students_delta_path, index=False)
@@ -263,6 +267,8 @@ tutors_delta["change_type"] = np.where(
     tutors_delta["created"] == tutors_delta["updated"],
     "INSERT",
     "UPDATE")
+tutors_delta["source_batch_id"] = f"sim_{ingest_stamp.date()}"
+tutors_delta["ingest_ts"] = ingest_stamp + timedelta(milliseconds=random.randint(1,500))
 os.makedirs(f"data/raw/tutors/{ingest_date_folder}", exist_ok=True)
 tutors_delta_path = f"data/raw/tutors/{ingest_date_folder}/tutors_delta.csv"
 tutors_delta.to_csv(tutors_delta_path, index=False)

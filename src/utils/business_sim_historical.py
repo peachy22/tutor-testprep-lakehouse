@@ -6,10 +6,10 @@ import os
 
 # declare start date, end date, and number of students for the first tutor in week 1
 
-sim_start = datetime(2021,8,23,0,0,0)
+sim_start = datetime(2021,8,24,0,0,0)
 sim_end = datetime(2027,12,31,0,0,0)
 hist_cutoff = datetime(2025,12,20,0,0,0)
-students_week_1 = 10
+students_week_1 = 28
 
 
 # create simulation functions
@@ -88,7 +88,7 @@ def create_new_tutor(tutor_count):
     else:
         first_name = random.choice(GIRL_NAMES)
     last_name = random.choice(LAST_NAMES)
-    dob = (datetime.today() + timedelta(days = random.randint(-365,365))) - timedelta(days=365*age)
+    dob = (datetime.today() + timedelta(days = random.randint(-600,0))) - timedelta(days=365*age)
     created = max(students["created"])
     tutors.loc[len(tutors)] = [tutor_id, first_name, last_name, sex, dob.date(), contract, 0, created, created]
     tutor_count += 1
@@ -107,9 +107,8 @@ def stochastic_churn(business_day, sim_start, sim_end, season):
     new_student_prob = base_prob + noise
     new_student_prob = max(0, min(1, new_student_prob))
     base_mult = 1 + 2 * progress
-    mult_noise = random.uniform(0.9, 1.1)  
-    new_student_multiplier = base_mult * mult_noise
-    new_student_multiplier = max(1, new_student_multiplier)
+    new_student_multiplier = int(base_mult)
+    new_student_multiplier = random.choice([1, new_student_multiplier])
     base_churn = 0.0044
     churn_noise = random.uniform(0.8, 1.2)
     stochastic_churn_prob = base_churn * churn_noise
