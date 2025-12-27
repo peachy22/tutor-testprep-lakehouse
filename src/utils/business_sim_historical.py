@@ -157,6 +157,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
         elif row["status"] == "Active":
             first_session = sessions_i[sessions_i["student_id"] == student_id]
             first_session_date = first_session["stamp"].iloc[0].date()
+            first_session_hour = first_session["stamp"].iloc[0].hour
             last_session = sessions_f[sessions_f["student_id"] == student_id]
             last_session_date = last_session["stamp"].iloc[0].date()
             curr_session_date = business_day.date()
@@ -171,14 +172,16 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
                     students.loc[students["student_id"] == student_id, "updated"] = business_day
                     if (last_session_date > date(curr_session_year,summer_cutoff_month,summer_cutoff_day) and subject_id != 1):
                         students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = 1
+                    else:
+                        students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = 0
                     tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] -= 1
                     active_student_count -= 1
                 else:
                     last_session_hour = last_session["stamp"].iloc[0].hour
-                    curr_session_hour = last_session_hour
+                    curr_session_hour = first_session_hour + random.choices([0,-1,1],[.8,.1,.1],k=1)[0]
                     duration = last_session["duration"].iloc[0]
                     stamp = datetime(curr_session_date.year, curr_session_date.month, curr_session_date.day, curr_session_hour, 0, 0)
-                    status = random.choices([0,1,2],[.75,.15,.10],k=1)[0]
+                    status = random.choices([0,1,2],[.8,.1,.1],k=1)[0]
                     sessions.loc[len(sessions)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,status]
                     sessions_f.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,status]
                     session_count += 1

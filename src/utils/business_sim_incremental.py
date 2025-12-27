@@ -136,6 +136,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
         elif row["status"] == "Active":
             first_session = sessions_i[sessions_i["student_id"] == student_id]
             first_session_date = first_session["stamp"].iloc[0].date()
+            first_session_hour = first_session["stamp"].iloc[0].hour
             last_session = sessions_f[sessions_f["student_id"] == student_id]
             last_session_date = last_session["stamp"].iloc[0].date()
             curr_session_date = business_day.date()
@@ -150,15 +151,17 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
                     students.loc[students["student_id"] == student_id, "updated"] = business_day
                     if (last_session_date > date(curr_session_year,summer_cutoff_month,summer_cutoff_day) and subject_id != 1):
                         students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = 1
+                    else:
+                        students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = 0
                     tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] -= 1
                     tutors.loc[tutors["tutor_id"] == tutor_id, "updated"] = business_day
                     active_student_count -= 1
                 else:
                     last_session_hour = last_session["stamp"].iloc[0].hour
-                    curr_session_hour = last_session_hour
+                    curr_session_hour = first_session_hour + random.choices([0,-1,1],[.8,.1,.1],k=1)[0]
                     duration = last_session["duration"].iloc[0]
                     stamp = datetime(curr_session_date.year, curr_session_date.month, curr_session_date.day, curr_session_hour, 0, 0)
-                    status = random.choices([0,1,2],[.75,.15,.10],k=1)[0]
+                    status = random.choices([0,1,2],[.8,.1,.1],k=1)[0]
                     sessions.loc[len(sessions)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,status]
                     sessions_f.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,status]
                     session_count += 1
@@ -219,26 +222,56 @@ new_sessions["ingest_ts"] = ingest_stamp + timedelta(milliseconds=random.randint
 
 
 duplicate_rows = []
+
 for idx, row in new_sessions.iterrows():
-    stamp = row["stamp"]
-    if random.random() < .03: # 3% durations go from hours to minutes
-        new_sessions.loc[idx, "duration"] *= 60
-    if random.random() < .01: # 1% sessions get emitted for a previous day
-        new_sessions.loc[idx, "stamp"] = stamp + timedelta(days = -random.randint(1,30))
-    if random.random() < .005: # .5% sessions get emitted for a future day
-        new_sessions.loc[idx, "stamp"] = stamp + timedelta(days = random.randint(1,30))
-    if random.random() < .05: # 5% null duration
-        new_sessions.loc[idx, "duration"] = None
-    if random.random() < .03: # 3% null status
-        new_sessions.loc[idx, "status"] = None
-    if random.random() < .03: # 3% null tutor_id
-        new_sessions.loc[idx, "tutor_id"] = None
-    if random.random() < .01: # 1% null stamp
-        new_sessions.loc[idx, "stamp"] = None
-    if random.random() < 0.33: # 3% duplicate session
-        dup = row.copy()
-        dup["ingest_ts"] = ingest_stamp + timedelta(milliseconds=random.randint(1,500))
+    base = row.copy()
+
+    if random.random() < 0.07:  # ~7% dirty rows total
+        # Mutually exclusive corruption modes
+        corruption_roll = random.random()
+        if corruption_roll < 0.25:
+            # Unit error: hours emitted as minutes
+            base["duration"] = base["duration"] * 60
+        elif corruption_roll < 0.45:
+            # Missing duration
+            base["duration"] = None
+        elif corruption_roll < 0.60:
+            # Missing tutor assignment
+            base["tutor_id"] = None
+        elif corruption_roll < 0.75:
+            # Missing status
+            base["status"] = None
+        elif corruption_roll < 0.90:
+            # Backdated session (late-arriving event)
+            base["stamp"] = base["stamp"] - timedelta(days=random.randint(1, 30))
+        else:
+            # Future-dated session (clock skew / bad source)
+            base["stamp"] = base["stamp"] + timedelta(days=random.randint(1, 30))
+    new_sessions.loc[idx] = base
+    dup_roll = random.random()
+    # ~2% total duplication rate
+    if dup_roll < 0.02:
+        dup = base.copy()
+        dup["ingest_ts"] = ingest_stamp + timedelta(
+            milliseconds=random.randint(1, 500)
+        )
+        # Decide duplicate type (mutually exclusive)
+        dup_type = random.random()
+        if dup_type < 0.50:
+            # 1. Exact replay (same payload, later ingest)
+            pass
+        elif dup_type < 0.80:
+            # 2. Status correction (scheduled → completed / canceled)
+            dup["status"] = random.choice([0, 1, 2])
+        else:
+            # 3. Duration correction (actual vs planned)
+            if dup["duration"] is not None:
+                dup["duration"] = max(
+                    0.25,
+                    dup["duration"] + random.choice([-0.5, 0.5, 1.0])
+                )
         duplicate_rows.append(dup)
+
 
 if duplicate_rows:
     dup_df = pd.DataFrame(duplicate_rows)
@@ -257,10 +290,26 @@ students_delta["change_type"] = np.where(
     "UPDATE")
 students_delta["source_batch_id"] = f"sim_{ingest_stamp.date()}"
 students_delta["ingest_ts"] = ingest_stamp + timedelta(milliseconds=random.randint(1,500))
+
+
+
+
 os.makedirs(f"data/raw/students/{ingest_date_folder}", exist_ok=True)
 students_delta_path = f"data/raw/students/{ingest_date_folder}/students_delta.csv"
 students_delta.to_csv(students_delta_path, index=False)
 
+duplicate_students = []
+
+for idx, row in students_delta.iterrows():
+    base = row.copy()
+
+    # ~.03% total payload duplication rate
+    if dup_roll < 0.003:
+        dup = base.copy()
+        dup["ingest_ts"] = ingest_stamp + timedelta(
+            milliseconds=random.randint(1, 500)
+        )
+        duplicate_rows.append(dup)
 
 tutors_delta = tutors[tutors["updated"].dt.date == bd.date()].copy()
 tutors_delta["change_type"] = np.where(

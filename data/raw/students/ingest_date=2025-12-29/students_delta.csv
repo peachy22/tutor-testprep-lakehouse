@@ -1,1 +1,2 @@
 student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,created,updated,change_type,source_batch_id,ingest_ts
+972,Aria,Williams,F,2010-10-08,9,Inactive,120,2025-12-21 15:00:00,2025-12-28,UPDATE,sim_2025-12-29,2025-12-29 00:00:00.482

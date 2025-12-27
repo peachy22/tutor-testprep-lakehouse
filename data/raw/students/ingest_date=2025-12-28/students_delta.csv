@@ -1,0 +1,3 @@
+student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,created,updated,change_type,source_batch_id,ingest_ts
+970,Aubrey,Lopez,F,2008-04-10,11,Inactive,120,2025-12-20 14:00:00,2025-12-27,UPDATE,sim_2025-12-28,2025-12-28 00:00:00.236
+971,Stella,Perez,F,2010-08-14,9,Inactive,120,2025-12-20 18:00:00,2025-12-27,UPDATE,sim_2025-12-28,2025-12-28 00:00:00.236

@@ -1,1 +1,0 @@
-aws s3 sync data\raw s3://tutor-testprep-lakehouse/raw/
