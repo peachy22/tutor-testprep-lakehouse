@@ -1,3 +1,5 @@
+# mostly the same logic from pre-migration history
+
 import pandas as pd
 import numpy as np
 import os
@@ -5,6 +7,8 @@ from datetime import datetime, date, timedelta
 from lists import GIRL_NAMES, BOY_NAMES, LAST_NAMES
 from business_sim_historical import sim_start, sim_end, hist_cutoff
 import random
+
+# collect the simulation history to continue the timeline with the same behaviors
 
 students = pd.read_csv('src/simulation/students.csv')
 students_helpers = pd.read_csv('src/simulation/students_helpers.csv')
@@ -26,7 +30,6 @@ student_count = students.shape[0]
 active_student_count = students[students["status"] == 'Active'].shape[0]
 session_count = sessions.shape[0]
 
- # function for creating new students as business days occur
 def create_new_student(business_day,new_student_multiplier,student_count, active_student_count):
     i = 1
     while i <= new_student_multiplier:
@@ -55,7 +58,6 @@ def create_new_student(business_day,new_student_multiplier,student_count, active
         active_student_count += 1
     return student_count, active_student_count
 
-    # function for hiring new tutors as session load increases
 def create_new_tutor(tutor_count):
     tutor_id = tutor_count
     age = random.choice([20,50])
@@ -72,7 +74,6 @@ def create_new_tutor(tutor_count):
     tutor_count += 1
     return tutor_id, tutor_count
 
-    # function for the random churn and onboarding of clients each day
 def stochastic_churn(business_day, sim_start, sim_end, season):
     progress = (business_day - sim_start).days / (sim_end - sim_start).days
     progress = max(0, min(1, progress))  
@@ -93,7 +94,6 @@ def stochastic_churn(business_day, sim_start, sim_end, season):
     student_tutor_ratio = 30
     return new_student_prob, new_student_multiplier, student_tutor_ratio, stochastic_churn_prob
 
-    # function for simulating new sessions and triggering the creation of new students and tutors
 def create_sessions(business_day, tutor_count, student_count, active_student_count, session_count, sim_start, sim_end):
     month = business_day.month
     if month in [9,10,11]:
@@ -195,76 +195,64 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
             continue
     return tutor_count, student_count, active_student_count, session_count
 
-
-
-# def daterange(start_date: date, end_date: date):
-#     for n in range((end_date - start_date).days + 1):
-#         yield start_date + timedelta(days=n)
-
+# the daily simulation begins after the last date in the history
 inc_hist_start = max(sessions_f["stamp"]).date() + timedelta(days=1)
-
-# inc_hist_end   = date(2025, 10, 12)
-
-# for d in daterange(inc_hist_start, inc_hist_end):
-#     last_datetime = max(sessions_f['stamp']) + timedelta(days = 1)
-#     bd = last_datetime - timedelta(hours=last_datetime.hour)
-#     ingest_date_folder = f"ingest_date={bd.strftime('%Y-%m-%d')}"
 
 bd = pd.Timestamp(inc_hist_start).normalize()
 ingest_stamp = bd + timedelta(days = 1)
 ingest_date_folder = f"ingest_date={ingest_stamp.strftime('%Y-%m-%d')}"
 
+# create today's data and append it to the history
 tutor_count, student_count, active_student_count, session_count = create_sessions(bd, tutor_count, student_count, active_student_count, session_count, sim_start, sim_end)
 
+# extract the sessions that were created today and prep for ingestion
 new_sessions = sessions[sessions["stamp"].dt.date == bd.date()].copy()
 new_sessions["source_batch_id"] = f"sim_{ingest_stamp.date()}"
 new_sessions["ingest_ts"] = ingest_stamp + timedelta(milliseconds=random.randint(1,500))
 
-
+# sessions ingested this way have certain chances to be corrupted or duplicated, necessitating cleansing in the silver layer
 duplicate_rows = []
-
 for idx, row in new_sessions.iterrows():
     base = row.copy()
-
-    if random.random() < 0.07:  # ~7% dirty rows total
-        # Mutually exclusive corruption modes
+    if random.random() < 0.07:  # 7% dirty rows total
+        # mutually exclusive corruption modes
         corruption_roll = random.random()
         if corruption_roll < 0.25:
-            # Unit error: hours emitted as minutes
+            # mnit error: hours emitted as minutes
             base["duration"] = base["duration"] * 60
         elif corruption_roll < 0.45:
-            # Missing duration
+            # missing duration
             base["duration"] = None
         elif corruption_roll < 0.60:
-            # Missing tutor assignment
+            # missing tutor assignment
             base["tutor_id"] = None
         elif corruption_roll < 0.75:
-            # Missing status
+            # missing status
             base["status"] = None
         elif corruption_roll < 0.90:
-            # Backdated session (late-arriving event)
+            # backdated session (late-arriving event)
             base["stamp"] = base["stamp"] - timedelta(days=random.randint(1, 30))
         else:
-            # Future-dated session (clock skew / bad source)
+            # future-dated session (clock skew / bad source)
             base["stamp"] = base["stamp"] + timedelta(days=random.randint(1, 30))
     new_sessions.loc[idx] = base
     dup_roll = random.random()
-    # ~2% total duplication rate
+    # 2% total duplication rate
     if dup_roll < 0.02:
         dup = base.copy()
         dup["ingest_ts"] = ingest_stamp + timedelta(
             milliseconds=random.randint(1, 500)
         )
-        # Decide duplicate type (mutually exclusive)
+        # decide duplicate type (mutually exclusive)
         dup_type = random.random()
         if dup_type < 0.50:
-            # 1. Exact replay (same payload, later ingest)
+            # exact replay (same payload, later ingest)
             pass
         elif dup_type < 0.80:
-            # 2. Status correction (scheduled → completed / canceled)
+            # status correction (scheduled → completed / canceled)
             dup["status"] = random.choice([0, 1, 2])
         else:
-            # 3. Duration correction (actual vs planned)
+            # duration correction (actual vs planned)
             if dup["duration"] is not None:
                 dup["duration"] = max(
                     0.25,
@@ -272,17 +260,16 @@ for idx, row in new_sessions.iterrows():
                 )
         duplicate_rows.append(dup)
 
-
 if duplicate_rows:
     dup_df = pd.DataFrame(duplicate_rows)
     new_sessions = pd.concat([new_sessions, dup_df], ignore_index=True)
 
-
-
+# new sessions + corruptions get ingested as a new csv
 os.makedirs(f"data/raw/sessions/{ingest_date_folder}", exist_ok=True)
 new_sessions_path = f"data/raw/sessions/{ingest_date_folder}/new_sessions.csv"
 new_sessions.to_csv(new_sessions_path, index=False)
 
+# log changes to students facts as a delta table and write to csv
 students_delta = students[students["updated"].dt.date == bd.date()].copy()
 students_delta["change_type"] = np.where(
     students_delta["created"] == students_delta["updated"],
@@ -290,27 +277,11 @@ students_delta["change_type"] = np.where(
     "UPDATE")
 students_delta["source_batch_id"] = f"sim_{ingest_stamp.date()}"
 students_delta["ingest_ts"] = ingest_stamp + timedelta(milliseconds=random.randint(1,500))
-
-
-
-
 os.makedirs(f"data/raw/students/{ingest_date_folder}", exist_ok=True)
 students_delta_path = f"data/raw/students/{ingest_date_folder}/students_delta.csv"
 students_delta.to_csv(students_delta_path, index=False)
 
-duplicate_students = []
-
-for idx, row in students_delta.iterrows():
-    base = row.copy()
-
-    # ~.03% total payload duplication rate
-    if dup_roll < 0.003:
-        dup = base.copy()
-        dup["ingest_ts"] = ingest_stamp + timedelta(
-            milliseconds=random.randint(1, 500)
-        )
-        duplicate_rows.append(dup)
-
+# log changes to tutors facts as a delta table and write to csv
 tutors_delta = tutors[tutors["updated"].dt.date == bd.date()].copy()
 tutors_delta["change_type"] = np.where(
     tutors_delta["created"] == tutors_delta["updated"],
@@ -322,7 +293,7 @@ os.makedirs(f"data/raw/tutors/{ingest_date_folder}", exist_ok=True)
 tutors_delta_path = f"data/raw/tutors/{ingest_date_folder}/tutors_delta.csv"
 tutors_delta.to_csv(tutors_delta_path, index=False)
 
-
+# write all, flawless data to history to continue the simulation
 sessions.to_csv('src/simulation/sessions.csv', index=False)
 students.to_csv('src/simulation/students.csv', index=False)
 tutors.to_csv('src/simulation/tutors.csv', index=False)
