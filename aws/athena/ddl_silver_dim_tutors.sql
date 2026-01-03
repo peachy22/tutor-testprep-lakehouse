@@ -1,5 +1,5 @@
 CREATE TABLE dim_tutors (
-    tutor_sk              BIGINT,
+    tutor_sk              INT,
     tutor_id              INT,
 
     first_name            STRING,
@@ -14,10 +14,10 @@ CREATE TABLE dim_tutors (
 
     effective_start_ts    TIMESTAMP,
     effective_end_ts      TIMESTAMP,
-    is_current             BOOLEAN,
+    is_current            BOOLEAN,
 
     source_batch_id       STRING,
-    ingest_ts             TIMESTAMP
+    slv_ingest_ts         TIMESTAMP
 )
 LOCATION 's3://tutor-testprep-lakehouse/silver/dim_tutors/'
 TBLPROPERTIES (

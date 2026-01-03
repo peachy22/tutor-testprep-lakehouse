@@ -1,5 +1,5 @@
 CREATE TABLE dim_students (
-    student_sk            BIGINT,
+    student_sk            INT,
     student_id            INT,
 
     first_name            STRING,
@@ -18,7 +18,7 @@ CREATE TABLE dim_students (
     is_current             BOOLEAN,
 
     source_batch_id       STRING,
-    ingest_ts             TIMESTAMP
+    slv_ingest_ts         TIMESTAMP
 )
 LOCATION 's3://tutor-testprep-lakehouse/silver/dim_students/'
 TBLPROPERTIES (
