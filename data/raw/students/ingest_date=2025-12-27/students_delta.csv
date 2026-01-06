@@ -1,5 +1,1 @@
 student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,created,updated,change_type,source_batch_id,ingest_ts
-816,Stella,Garcia,F,2009-04-04,10,Inactive,120,2025-08-15 14:00:00,2025-12-26 00:00:00,UPDATE,sim_2025-12-27,2025-12-27 00:00:00.035
-968,Emilia,Carter,F,2012-06-20,7,Inactive,120,2025-12-19 17:00:00,2025-12-26 00:00:00,UPDATE,sim_2025-12-27,2025-12-27 00:00:00.035
-969,Hazel,Martin,F,2008-08-25,11,Inactive,120,2025-12-19 14:00:00,2025-12-26 00:00:00,UPDATE,sim_2025-12-27,2025-12-27 00:00:00.035
-976,Levi,Rodriguez,M,2008-10-18,11,Active,120,2025-12-26 17:00:00,2025-12-26 17:00:00,INSERT,sim_2025-12-27,2025-12-27 00:00:00.035

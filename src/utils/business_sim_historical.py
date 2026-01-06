@@ -6,7 +6,7 @@ import os
 
 # declare start date and number of students for the first tutor in week 1
 students_week_1 = 28
-sim_start = datetime(2021,8,24,0,0,0)
+sim_start = datetime(2021,8,24,12,0,)
 # this is the date at which the historical sim will end, after which daily batch loads will occur
 hist_cutoff = datetime(2025,12,20,0,0,0) 
 # some growth behaviors will be bound to the progress towards this date
@@ -172,8 +172,9 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
             sessions_i.loc[len(sessions_i)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
             sessions_f.loc[len(sessions_f)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
             students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = student_is_returnable
-            # increment the number of sessions for id and the cleint load for the selected tutor
+            # increment the number of sessions for id and the client load for the selected tutor
             tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] += 1
+            tutors.loc[tutors["tutor_id"] == tutor_id, "updated"] = stamp
             session_count += 1
             continue
         # students who are continuing their schedule today:
@@ -185,10 +186,12 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
             last_session_date = last_session["stamp"].iloc[0].date()
             curr_session_date = business_day.date()
             curr_session_year = business_day.year
+            curr_session_hour = first_session_hour + random.choices([0,-1,1],[.8,.1,.1],k=1)[0]
             duration_delta = last_session_date-first_session_date
             duration_days = duration_delta.days
             subject_id = first_session["subject_id"].iloc[0]
             tutor_id = first_session["tutor_id"].iloc[0]
+            stamp = datetime(curr_session_date.year, curr_session_date.month, curr_session_date.day, curr_session_hour, 0, 0)
             # students have a session once per week. If it has been a week since their last session:
             if (curr_session_date-last_session_date).days == 7:
                 # the student will quit if they hit the random churn threshold, if they are an SAT student and they have prepped for enough time, or if their school year is over (they can return next year)
@@ -202,14 +205,13 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
                         students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = 0
                     # decrement the student load to free up the tutor
                     tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] -= 1
+                    tutors.loc[tutors["tutor_id"] == tutor_id, "updated"] = stamp
                     active_student_count -= 1
                 # the student will have a session, or a cancelled session, if they do not quit
                 else:
                     last_session_hour = last_session["stamp"].iloc[0].hour
                     # the student's session time is roughly the same as their last one
-                    curr_session_hour = first_session_hour + random.choices([0,-1,1],[.8,.1,.1],k=1)[0]
                     duration = last_session["duration"].iloc[0]
-                    stamp = datetime(curr_session_date.year, curr_session_date.month, curr_session_date.day, curr_session_hour, 0, 0)
                     # a student is 10% likely to cancel outright with notice - meaning no charge, 10% likely to cancel late or no-show- meaning we charge them. 
                     status = random.choices([0,1,2],[.8,.1,.1],k=1)[0]
                     sessions.loc[len(sessions)] = [session_count,student_id,tutor_id,subject_id,stamp,duration,status]
@@ -244,6 +246,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
             sessions_f.loc[sessions_f["student_id"] == student_id] = [session_count,student_id,tutor_id,subject_id,stamp,duration,0]
             # active student counts and session ids increment
             tutors.loc[tutors["tutor_id"] == tutor_id, "active_students"] += 1
+            tutors.loc[tutors["tutor_id"] == tutor_id, "updated"] = stamp
             session_count += 1
             active_student_count += 1
             continue

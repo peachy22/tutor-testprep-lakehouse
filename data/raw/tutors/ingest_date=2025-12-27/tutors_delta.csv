@@ -1,4 +1,1 @@
 tutor_id,first_name,last_name,sex,date_of_birth,contract_rate,active_students,created,updated,change_type,source_batch_id,ingest_ts
-0,Stephan,Pichardo,M,1993-10-30,0,28,2021-08-24 00:00:00,2025-12-26,UPDATE,sim_2025-12-27,2025-12-27 00:00:00.266
-2,Ava,Rodriguez,F,1975-11-27,30,26,2023-11-03 14:00:00,2025-12-26,UPDATE,sim_2025-12-27,2025-12-27 00:00:00.266
-4,Harper,Moore,F,1975-01-22,40,15,2025-11-05 18:00:00,2025-12-26,UPDATE,sim_2025-12-27,2025-12-27 00:00:00.266
