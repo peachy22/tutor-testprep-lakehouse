@@ -60,7 +60,7 @@ def create_new_student(business_day,new_student_multiplier,student_count, active
 
 def create_new_tutor(tutor_count):
     tutor_id = tutor_count
-    age = random.choice([20,50])
+    age = random.choice(range(20,50))
     contract = random.choice([30,35,40,45,50])
     sex = random.choice(['M','F'])
     if sex == 'M':

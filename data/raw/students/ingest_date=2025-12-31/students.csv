@@ -775,7 +775,7 @@ student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,cre
 773,Harper,Clark,F,2008-07-28,12,Inactive,120,2025-08-19 17:00:00,2025-11-11 12:00:00
 774,Stella,Flores,F,2010-05-18,10,Inactive,120,2025-08-19 13:00:00,2025-11-21 12:00:00
 775,Thomas,Davis,M,2009-11-15,12,Active,120,2025-08-20 18:00:00,2025-10-17 12:00:00
-776,Charles,Lopez,M,2012-07-19,7,Inactive,120,2025-08-20 18:00:00,2025-12-31 00:00:00
+776,Charles,Lopez,M,2012-07-19,7,Active,120,2025-08-20 18:00:00,2025-08-20 18:00:00
 777,Noah,Brown,M,2010-11-16,10,Inactive,120,2025-08-22 13:00:00,2025-10-13 12:00:00
 778,Lily,Johnson,F,2013-04-28,7,Inactive,120,2025-08-24 16:00:00,2025-10-14 12:00:00
 779,Lily,Anderson,F,2009-07-22,10,Active,120,2025-08-24 15:00:00,2025-08-24 15:00:00
@@ -932,7 +932,7 @@ student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,cre
 930,Lily,Davis,F,2012-12-03,7,Inactive,120,2025-12-21 15:00:00,2025-12-28 12:00:00
 931,Leah,Roberts,F,2009-08-17,10,Inactive,120,2025-12-22 13:00:00,2025-12-29 12:00:00
 932,Oliver,Hill,M,2008-08-20,11,Inactive,120,2025-12-23 15:00:00,2025-12-30 12:00:00
-933,Emily,King,F,2009-01-19,10,Inactive,120,2025-12-24 15:00:00,2025-12-31 00:00:00
+933,Emily,King,F,2009-01-19,10,Active,120,2025-12-24 15:00:00,2025-12-24 15:00:00
 934,Ellie,Lee,F,2008-06-03,11,Active,120,2025-12-25 18:00:00,2025-12-25 18:00:00
 935,Olivia,Garcia,F,2008-08-08,11,Active,120,2025-12-25 15:00:00,2025-12-25 15:00:00
 936,Nova,Mitchell,F,2013-01-15,6,Active,120,2025-12-27 17:00:00,2025-12-27 17:00:00
@@ -940,4 +940,3 @@ student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,cre
 938,Ellie,Gonzalez,F,2009-09-21,10,Active,120,2025-12-29 16:00:00,2025-12-29 16:00:00
 939,Savannah,Williams,F,2009-10-12,10,Active,120,2025-12-30 14:00:00,2025-12-30 14:00:00
 940,Lucy,Lewis,F,2009-02-08,10,Active,120,2025-12-30 16:00:00,2025-12-30 16:00:00
-941,Alexander,Rodriguez,M,2009-02-08,10,Active,120,2025-12-31 13:00:00,2025-12-31 13:00:00

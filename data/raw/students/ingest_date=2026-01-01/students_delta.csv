@@ -1,0 +1,4 @@
+student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,created,updated,change_type,source_batch_id,ingest_ts
+776,Charles,Lopez,M,2012-07-19,7,Inactive,120,2025-08-20 18:00:00,2025-12-31 00:00:00,UPDATE,sim_2026-01-01,2026-01-01 00:00:00.179
+933,Emily,King,F,2009-01-19,10,Inactive,120,2025-12-24 15:00:00,2025-12-31 00:00:00,UPDATE,sim_2026-01-01,2026-01-01 00:00:00.179
+941,Alexander,Rodriguez,M,2009-02-08,10,Active,120,2025-12-31 13:00:00,2025-12-31 13:00:00,INSERT,sim_2026-01-01,2026-01-01 00:00:00.179

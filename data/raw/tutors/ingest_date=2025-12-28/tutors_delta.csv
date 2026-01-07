@@ -1,2 +1,0 @@
-tutor_id,first_name,last_name,sex,date_of_birth,contract_rate,active_students,created,updated,change_type,source_batch_id,ingest_ts
-2,Luca,Campbell,M,2005-06-01,50,24,2023-10-31 13:00:00,2025-12-27 16:00:00,UPDATE,sim_2025-12-28,2025-12-28 00:00:00.103

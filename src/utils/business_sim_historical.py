@@ -8,7 +8,7 @@ import os
 students_week_1 = 28
 sim_start = datetime(2021,8,24,12,0,)
 # this is the date at which the historical sim will end, after which daily batch loads will occur
-hist_cutoff = datetime(2025,12,20,0,0,0) 
+hist_cutoff = datetime(2025,12,31,0,0,0) 
 # some growth behaviors will be bound to the progress towards this date
 sim_end = datetime(2027,12,31,0,0,0)
 
@@ -91,7 +91,7 @@ def create_new_student(business_day,new_student_multiplier,student_count, active
 # function for hiring new tutors as session load increases
 def create_new_tutor(tutor_count):
     tutor_id = tutor_count
-    age = random.choice([20,50])
+    age = random.choice(range(20,50))
     # contractors have different rates depending on experience
     contract = random.choice([30,35,40,45,50])
     sex = random.choice(['M','F'])

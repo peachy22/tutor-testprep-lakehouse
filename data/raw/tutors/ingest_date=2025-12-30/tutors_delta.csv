@@ -1,3 +1,0 @@
-tutor_id,first_name,last_name,sex,date_of_birth,contract_rate,active_students,created,updated,change_type,source_batch_id,ingest_ts
-1,Theodore,Lopez,M,2005-09-23,40,21,2021-11-26 18:00:00,2025-12-29 15:00:00,UPDATE,sim_2025-12-30,2025-12-30 00:00:00.147
-2,Luca,Campbell,M,2005-06-01,50,25,2023-10-31 13:00:00,2025-12-29 13:00:00,UPDATE,sim_2025-12-30,2025-12-30 00:00:00.147

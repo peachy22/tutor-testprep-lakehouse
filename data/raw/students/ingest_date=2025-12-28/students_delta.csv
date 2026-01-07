@@ -1,3 +1,0 @@
-student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,created,updated,change_type,source_batch_id,ingest_ts
-963,Luke,Hill,M,2008-05-21,11,Inactive,120,2025-12-20 14:00:00,2025-12-27,UPDATE,sim_2025-12-28,2025-12-28 00:00:00.277
-964,Claire,Walker,F,2009-02-17,10,Inactive,120,2025-12-20 17:00:00,2025-12-27,UPDATE,sim_2025-12-28,2025-12-28 00:00:00.277

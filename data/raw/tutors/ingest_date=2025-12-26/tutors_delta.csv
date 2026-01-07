@@ -1,3 +1,0 @@
-tutor_id,first_name,last_name,sex,date_of_birth,contract_rate,active_students,created,updated,change_type,source_batch_id,ingest_ts
-1,Theodore,Lopez,M,2005-09-23,40,22,2021-11-26 18:00:00,2025-12-25 14:00:00,UPDATE,sim_2025-12-26,2025-12-26 00:00:00.385
-4,Evelyn,Martin,F,2005-06-16,35,20,2025-11-04 17:00:00,2025-12-25 17:00:00,UPDATE,sim_2025-12-26,2025-12-26 00:00:00.385

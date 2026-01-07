@@ -1,0 +1,34 @@
+INSERT INTO tutor_testprep_silver.dim_tutors
+WITH params AS (
+	SELECT TIMESTAMP '2026-01-01 01:00:00' AS slv_ingest_ts
+),
+    max_update_ts AS (
+    SELECT CAST(tutor_id AS INT) AS tutor_id,
+    MAX(updated) AS updated_ts
+    FROM tutor_testprep_raw.tutors
+    GROUP BY CAST(tutor_id AS INT)
+)
+SELECT
+    ROW_NUMBER() OVER (ORDER BY t.tutor_id, t.ingest_ts, t.updated)
+      + COALESCE((SELECT MAX(tutor_sk) FROM tutor_testprep_silver.dim_tutors), 0) AS tutor_sk,
+    CAST(t.tutor_id AS INT)                AS tutor_id,
+    t.first_name,
+    t.last_name,
+    t.sex,
+    CAST(t.date_of_birth AS DATE)           AS date_of_birth,
+    CAST(t.contract_rate AS DECIMAL(10,2))  AS contract_rate,
+    CAST(t.active_students AS INT)          AS active_students,
+    CAST(t.created AS TIMESTAMP)            AS created_ts,
+    CAST(t.updated AS TIMESTAMP)        AS effective_start_ts,
+    LEAD(CAST(t.updated AS TIMESTAMP),1,CAST('9999-12-31 23:59:59' AS TIMESTAMP)) OVER (PARTITION BY t.tutor_id ORDER BY t.updated ASC)      AS effective_end_ts,
+    CASE WHEN CAST(t.updated AS TIMESTAMP) = m.updated_ts THEN true ELSE false END AS is_current,
+    CASE WHEN t.source_batch_id IS NULL THEN 'migration' ELSE source_batch_id END AS source_batch_id,
+    ingest_ts AS raw_ingest_ts,
+    p.slv_ingest_ts
+FROM tutor_testprep_raw.tutors t
+LEFT JOIN max_update_ts m ON CAST(m.tutor_id AS INT) = CAST(t.tutor_id AS INT)
+CROSS JOIN params p
+WHERE 1=1
+AND change_type IN ('INSERT', 'UPDATE')
+
+
