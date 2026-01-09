@@ -12,7 +12,7 @@
      slv_ingest_ts
  )
 WITH params AS (
-	SELECT TIMESTAMP '2026-01-01 01:00:00' AS slv_ingest_ts
+	SELECT TIMESTAMP '2026-01-01 02:00:00' AS slv_ingest_ts
 ),
 latest_tutor AS (
 	SELECT student_id,
@@ -75,6 +75,7 @@ ranked AS (
 		LEFT JOIN latest_tutor lt ON s.student_id = lt.student_id
 	WHERE s.session_id IS NOT NULL
 	AND s.source_batch_id IS NOT NULL
+	AND s.ingest_date = CAST((SELECT slv_ingest_ts FROM params) AS DATE)
 )
 SELECT 
     session_id,

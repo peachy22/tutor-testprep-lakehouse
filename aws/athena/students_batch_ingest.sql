@@ -1,6 +1,6 @@
 INSERT INTO tutor_testprep_silver.dim_students
 WITH params AS (
-	SELECT TIMESTAMP '2026-01-01 01:00:00' AS slv_ingest_ts
+	SELECT TIMESTAMP '2026-01-01 02:00:00' AS slv_ingest_ts
 ),
     max_update_ts AS (
     SELECT CAST(student_id AS INT) AS student_id,
@@ -31,3 +31,4 @@ LEFT JOIN max_update_ts m ON CAST(m.student_id AS INT) = CAST(t.student_id AS IN
 CROSS JOIN params p
 WHERE 1=1
 AND change_type IN ('INSERT', 'UPDATE')
+AND t.ingest_date = CAST((SELECT slv_ingest_ts FROM params) AS DATE)

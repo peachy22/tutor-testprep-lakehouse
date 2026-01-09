@@ -12,7 +12,7 @@
      slv_ingest_ts
  )
 WITH params AS (
-	SELECT TIMESTAMP '2026-12-31 01:00:00' AS slv_ingest_ts
+	SELECT TIMESTAMP '2025-12-31 01:00:00' AS slv_ingest_ts
 ),
 latest_tutor AS (
 	SELECT student_id,

@@ -1,6 +1,6 @@
 INSERT INTO tutor_testprep_silver.dim_tutors
 WITH params AS (
-	SELECT TIMESTAMP '2026-12-31 01:00:00' AS slv_ingest_ts
+	SELECT TIMESTAMP '2025-12-31 01:00:00' AS slv_ingest_ts
 )
 SELECT
     CAST(tutor_id AS INT)                AS tutor_sk,

@@ -1,3 +1,4 @@
+
 MERGE INTO tutor_testprep_silver.dim_students t
 USING (
     SELECT DISTINCT

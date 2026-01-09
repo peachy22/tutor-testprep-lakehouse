@@ -1,4 +1,0 @@
-student_id,first_name,last_name,sex,date_of_birth,grade,status,contract_rate,created,updated,change_type,source_batch_id,ingest_ts
-11,Zoey,Clark,F,2010-03-12,11,Inactive,80,2021-08-24 12:00:00,2025-12-31 00:00:00,UPDATE,sim_2026-01-01,2026-01-01 00:00:00.031
-942,Elias,Davis,M,2008-12-27,11,Active,120,2025-12-31 13:00:00,2025-12-31 13:00:00,INSERT,sim_2026-01-01,2026-01-01 00:00:00.031
-943,Henry,Roberts,M,2013-09-08,6,Active,120,2025-12-31 18:00:00,2025-12-31 18:00:00,INSERT,sim_2026-01-01,2026-01-01 00:00:00.031

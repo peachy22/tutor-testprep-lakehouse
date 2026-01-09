@@ -1,3 +1,0 @@
-tutor_id,first_name,last_name,sex,date_of_birth,contract_rate,active_students,created,updated,change_type,source_batch_id,ingest_ts
-0,Stephan,Pichardo,M,1993-10-30,0,26,2021-08-24 12:00:00,2025-12-31 18:00:00,UPDATE,sim_2026-01-01,2026-01-01 00:00:00.314
-3,Noah,Robinson,M,2004-09-16,45,25,2024-11-07 14:00:00,2025-12-31 18:00:00,UPDATE,sim_2026-01-01,2026-01-01 00:00:00.314
