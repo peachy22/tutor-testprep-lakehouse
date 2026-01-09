@@ -1,0 +1,1 @@
+aws s3 sync src\simulation s3://tutor-testprep-lakehouse/simulation/ --delete
