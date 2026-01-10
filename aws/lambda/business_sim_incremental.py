@@ -180,7 +180,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
                 # the student will quit if they hit the random churn threshold, if they are an SAT student and they have prepped for enough time, or if their school year is over (they can return next year)
                 if random.random() < stochastic_churn_prob or (duration_days > 120 and subject_id == 1) or (last_session_date > date(curr_session_year,summer_cutoff_month,summer_cutoff_day) and subject_id != 1):
                     students.loc[students["student_id"] == student_id, "status"] = 'Inactive'
-                    students.loc[students["student_id"] == student_id, "updated"] = business_day
+                    students.loc[students["student_id"] == student_id, "updated"] = stamp
                     # the student is returnable if they were studying standard school work and quit at the end of their school year
                     if (last_session_date > date(curr_session_year,summer_cutoff_month,summer_cutoff_day) and subject_id != 1):
                         students_helpers.loc[students_helpers["student_id"] == student_id, "returnable"] = 1

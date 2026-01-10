@@ -1,11 +1,12 @@
 INSERT INTO tutor_testprep_silver.dim_tutors
 WITH params AS (
-	SELECT TIMESTAMP '2026-01-01 02:00:00' AS slv_ingest_ts
+	SELECT TIMESTAMP '2026-01-02 02:00:00' AS slv_ingest_ts
 ),
     max_update_ts AS (
     SELECT CAST(tutor_id AS INT) AS tutor_id,
     MAX(updated) AS updated_ts
     FROM tutor_testprep_raw.tutors
+    WHERE ingest_date = (SELECT CAST(slv_ingest_ts AS DATE) FROM params)
     GROUP BY CAST(tutor_id AS INT)
 )
 SELECT
@@ -19,8 +20,8 @@ SELECT
     CAST(t.contract_rate AS DECIMAL(10,2))  AS contract_rate,
     CAST(t.active_students AS INT)          AS active_students,
     CAST(t.created AS TIMESTAMP)            AS created_ts,
-    CAST(t.updated AS TIMESTAMP)        AS effective_start_ts,
-    LEAD(CAST(t.updated AS TIMESTAMP),1,CAST('9999-12-31 23:59:59' AS TIMESTAMP)) OVER (PARTITION BY t.tutor_id ORDER BY t.updated ASC)      AS effective_end_ts,
+    p.slv_ingest_ts                         AS effective_start_ts,
+    CAST('9999-12-31 23:59:59' AS TIMESTAMP)     AS effective_end_ts,
     CASE WHEN CAST(t.updated AS TIMESTAMP) = m.updated_ts THEN true ELSE false END AS is_current,
     CASE WHEN t.source_batch_id IS NULL THEN 'migration' ELSE source_batch_id END AS source_batch_id,
     ingest_ts AS raw_ingest_ts,
