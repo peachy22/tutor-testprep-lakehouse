@@ -1,4 +1,4 @@
-INSERT INTO dim_appt_status
+INSERT INTO dim_subjects
 WITH params AS (
 	SELECT TIMESTAMP '2026-12-31 01:00:00' AS slv_ingest_ts
 )

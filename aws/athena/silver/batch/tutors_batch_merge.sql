@@ -2,10 +2,10 @@ MERGE INTO tutor_testprep_silver.dim_tutors t
 USING (
     SELECT DISTINCT
         CAST(tutor_id AS INT) AS tutor_id,
-        TIMESTAMP '2026-01-02 02:00:00' AS effective_end_ts
+        (SELECT DATE_ADD('day', 1, MAX(slv_ingest_ts)) FROM tutor_testprep_silver.fct_sessions) AS effective_end_ts
     FROM tutor_testprep_raw.tutors
     WHERE change_type = 'UPDATE'
-        AND ingest_date = CAST(CAST('2026-01-02 02:00:00' AS TIMESTAMP) AS DATE)
+        AND ingest_date = CAST((SELECT DATE_ADD('day', 1, MAX(slv_ingest_ts)) FROM tutor_testprep_silver.fct_sessions) AS DATE)
 ) s
 ON t.tutor_id = s.tutor_id
 AND t.is_current = true

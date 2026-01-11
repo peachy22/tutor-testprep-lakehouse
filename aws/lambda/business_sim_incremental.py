@@ -345,8 +345,6 @@ s3.put_object(Bucket=BUCKET, Key=f"simulation/students.csv", Body=io.StringIO(st
 s3.put_object(Bucket=BUCKET, Key=f"simulation/students_helpers.csv", Body=io.StringIO(students_helpers.to_csv(index=False)).getvalue())
 
 
-
-
 def lambda_handler(event, context):
     return {
         "status": "success",
