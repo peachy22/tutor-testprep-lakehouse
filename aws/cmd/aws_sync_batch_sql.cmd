@@ -1,1 +1,1 @@
-aws s3 sync aws\athena\silver\batch s3://tutor-testprep-lakehouse/silver/sql/batch_process/
+aws s3 sync aws\athena\silver\batch s3://tutor-testprep-lakehouse/silver/sql/batch_process/ --delete

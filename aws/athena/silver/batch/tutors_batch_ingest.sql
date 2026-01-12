@@ -1,6 +1,6 @@
 INSERT INTO tutor_testprep_silver.dim_tutors
 WITH params AS (
-	SELECT DATE_ADD('day', 1, MAX(slv_ingest_ts)) AS slv_ingest_ts FROM tutor_testprep_silver.fct_sessions 
+	SELECT MAX(slv_ingest_ts) AS slv_ingest_ts FROM tutor_testprep_silver.fct_sessions 
 ),
     max_update_ts AS (
     SELECT CAST(tutor_id AS INT) AS tutor_id,
