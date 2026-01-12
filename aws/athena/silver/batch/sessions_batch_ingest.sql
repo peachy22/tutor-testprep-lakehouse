@@ -12,7 +12,7 @@
      slv_ingest_ts
  )
 WITH params AS (
-	SELECT DATE_ADD('day', 1, MAX(slv_ingest_ts)) FROM tutor_testprep_silver.fct_sessions AS slv_ingest_ts
+	SELECT DATE_ADD('day', 1, MAX(slv_ingest_ts)) AS slv_ingest_ts FROM tutor_testprep_silver.fct_sessions 
 ),
 latest_tutor AS (
 	SELECT student_id,
