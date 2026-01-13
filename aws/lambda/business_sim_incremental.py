@@ -2,9 +2,16 @@ import pandas as pd
 import numpy as np
 import boto3
 import io
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import random
+import json
+import logging
 
+
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.INFO)
+
+events_client = boto3.client("events")
 
 GIRL_NAMES = [
     "Ava","Emma","Olivia","Sophia","Isabella","Mia","Amelia","Harper","Evelyn","Abigail",
@@ -344,12 +351,48 @@ s3.put_object(Bucket=BUCKET, Key=f"simulation/tutors.csv", Body=io.StringIO(tuto
 s3.put_object(Bucket=BUCKET, Key=f"simulation/students.csv", Body=io.StringIO(students.to_csv(index=False)).getvalue())
 s3.put_object(Bucket=BUCKET, Key=f"simulation/students_helpers.csv", Body=io.StringIO(students_helpers.to_csv(index=False)).getvalue())
 
+def build_simulation_completed_event():
+    return {
+        "status": "SUCCESS",
+        "emitted_at": datetime.now(timezone.utc).isoformat()
+    }
+
+def emit_simulation_completed_event(detail: dict) -> None:
+    response = events_client.put_events(
+        Entries=[
+            {
+                "Source": "tutor.simulation",
+                "DetailType": "SimulationCompleted",
+                "Detail": json.dumps(detail),
+                "EventBusName": "default"
+            }
+        ]
+    )
+    entry = response["Entries"][0]
+    if "ErrorCode" in entry:
+        raise RuntimeError(
+            f"Failed to emit SimulationCompleted event: "
+            f"{entry['ErrorCode']} - {entry.get('ErrorMessage')}"
+        )
+
+
 
 def lambda_handler(event, context):
-    return {
-        "status": "success",
-        "sim_date": str(bd.date()),
-        "new_sessions_count": new_sessions.shape[0],
-        "students_delta_count": students_delta.shape[0],
-        "tutors_delta_count": tutors_delta.shape[0]
-    }
+        
+    try:
+
+        event_detail = build_simulation_completed_event()
+
+        emit_simulation_completed_event(event_detail)
+
+        return {
+         "status": "success",
+         "sim_date": str(bd.date()),
+         "new_sessions_count": new_sessions.shape[0],
+         "students_delta_count": students_delta.shape[0],
+         "tutors_delta_count": tutors_delta.shape[0]
+         }
+
+    except Exception:
+        LOGGER.exception("Simulation run failed")
+        raise
