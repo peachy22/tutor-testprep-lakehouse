@@ -1,2 +1,4 @@
 src/utils/__pycache__/*.pyc
+google/__pycache__/*.pyc
+google/service_account.json
 ./notes.txt

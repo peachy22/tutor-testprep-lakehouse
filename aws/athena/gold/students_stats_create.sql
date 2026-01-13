@@ -1,4 +1,4 @@
-CREATE TABLE tutor_testprep.students_stats
+CREATE TABLE tutor_testprep.active_students
 WITH (    table_type = 'ICEBERG',
     format = 'PARQUET',
     location = 's3://tutor-testprep-lakehouse/gold/students_stats/',
@@ -52,7 +52,8 @@ SELECT
     bss.lifetime_billable_sessions,
     COALESCE(nss.lifetime_cancelled_sessions,0) AS lifetime_cancelled_sessions,
 
-    (SELECT MAX(slv_ingest_ts) FROM tutor_testprep_silver.fct_sessions) AS as_of_ts
+    (SELECT MAX(slv_ingest_ts) FROM tutor_testprep_silver.fct_sessions) AS as_of_ts,
+    CAST(current_timestamp AS TIMESTAMP) AS gold_generated_at
 
 FROM tutor_testprep_silver.dim_students s
 LEFT JOIN billable_session_stats bss ON s.student_id = bss.student_id
