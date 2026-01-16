@@ -1,4 +1,5 @@
 src/utils/__pycache__/*.pyc
+src/utils/business_sim_analytics.pbix
 google/__pycache__/*.pyc
 google/service_account.json
 ./notes.txt

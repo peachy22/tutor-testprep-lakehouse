@@ -103,7 +103,7 @@ def create_sessions(business_day, tutor_count, student_count, active_student_cou
         season = 'spring'
     else:
         season = 'summer'
-    # check if a new clien signs up today
+    # check if a new client signs up today
     new_student_prob, new_student_multiplier, student_tutor_ratio, stochastic_churn_prob = stochastic_churn(business_day, sim_start, sim_end, season)
     if random.random() < new_student_prob:
         student_count, active_student_count = create_new_student(business_day,new_student_multiplier,student_count, active_student_count)
