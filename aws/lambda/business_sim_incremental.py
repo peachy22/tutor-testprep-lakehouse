@@ -11,7 +11,7 @@ import logging
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
-events_client = boto3.client("events")
+events_client = boto3.client("events")  
 
 GIRL_NAMES = [
     "Ava","Emma","Olivia","Sophia","Isabella","Mia","Amelia","Harper","Evelyn","Abigail",
@@ -354,7 +354,11 @@ s3.put_object(Bucket=BUCKET, Key=f"simulation/students_helpers.csv", Body=io.Str
 def build_simulation_completed_event():
     return {
         "status": "SUCCESS",
-        "emitted_at": datetime.now(timezone.utc).isoformat()
+        "emitted_at": datetime.now(timezone.utc).isoformat(),
+        "sim_date": str(bd.date()),
+        "new_sessions_count": new_sessions.shape[0],
+        "students_delta_count": students_delta.shape[0],
+        "tutors_delta_count": tutors_delta.shape[0]
     }
 
 def emit_simulation_completed_event(detail: dict) -> None:
@@ -375,23 +379,17 @@ def emit_simulation_completed_event(detail: dict) -> None:
             f"{entry['ErrorCode']} - {entry.get('ErrorMessage')}"
         )
 
-
+ 
 
 def lambda_handler(event, context):
-        
+    LOGGER.info("Starting batch simulation")
     try:
 
         event_detail = build_simulation_completed_event()
 
         emit_simulation_completed_event(event_detail)
 
-        return {
-         "status": "success",
-         "sim_date": str(bd.date()),
-         "new_sessions_count": new_sessions.shape[0],
-         "students_delta_count": students_delta.shape[0],
-         "tutors_delta_count": tutors_delta.shape[0]
-         }
+        return event_detail
 
     except Exception:
         LOGGER.exception("Simulation run failed")

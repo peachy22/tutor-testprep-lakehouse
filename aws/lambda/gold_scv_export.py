@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     worksheet = sheet.worksheet("students")
 
     conn = connect(
-        s3_staging_dir="s3://tutor-testprep-lakehouse/athena/query-results/",
+        s3_staging_dir="s3://tutor-testprep-lakehouse/athena/query-results/", 
         region_name="us-east-1",
         schema_name="tutor_testprep"
     )
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
     sql = """
         SELECT *
         FROM active_students
-        ORDER BY last_session_ts DESC
+        ORDER BY last_session_ts DESC 
     """
 
     df = pd.read_sql(sql, conn)

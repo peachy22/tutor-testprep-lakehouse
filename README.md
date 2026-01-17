@@ -78,8 +78,8 @@ Gold artifacts are materialized as Athena tables for maximum AWS comute cost opt
 
 • Lambda for raw session generation for the previous date occurs via Eventbridge scheduler at 1am each morning 
 • Eventbridge custom event handler for Silver ingestion Lambda listents for successful raw loads
-• Gold transformations run later each morning, after silver completion
-• Eventbridge custom event handler for Drive API Lambda listens for successful gold loads
+• Eventbridge custom event handler for Gold materialization Lambda listents for successful silver ingests
+• Eventbridge custom event handler for Drive API Lambda listens for successful gold materializations
 
 ## Technologies Used
 

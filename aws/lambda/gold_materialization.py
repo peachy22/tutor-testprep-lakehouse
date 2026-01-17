@@ -7,29 +7,23 @@ import json
 import logging
 
 events_client = boto3.client("events")
-s3 = boto3.client("s3")
+s3 = boto3.client("s3") 
 
 LOGGER = logging.getLogger()
-LOGGER.setLevel(logging.INFO) 
+LOGGER.setLevel(logging.INFO)
 
-ATHENA_DATABASE = "tutor_testprep_silver"
-ATHENA_OUTPUT = "s3://tutor-testprep-lakehouse/athena/lambda/"
+ATHENA_DATABASE = "tutor_testprep"
+ATHENA_OUTPUT = "s3://tutor-testprep-lakehouse/athena/lambda/" 
 ATHENA_WORKGROUP = "primary"
 
 athena = boto3.client("athena")
 
 SQL_BUCKET = "tutor-testprep-lakehouse"
-SQL_PREFIX = "silver/sql/batch_process/"
+SQL_PREFIX = "gold/sql/gold_materialization/"
 
 sql_files = [
-           "repair_sessions.sql",
-            "repair_students.sql",
-           "repair_tutors.sql",
-            "sessions_batch_ingest.sql",
-           "students_batch_merge.sql",
-            "students_batch_ingest.sql",
-            "tutors_batch_merge.sql",
-            "tutors_batch_ingest.sql"
+           "active_students_drop_table.sql",
+            "active_students_create_table.sql"
         ]
 
 def run_athena_query(sql: str) -> str:
@@ -75,33 +69,33 @@ def load_sql(filename: str) -> str:
     )
     return response["Body"].read().decode("utf-8")
 
-def build_ingestion_completed_event():
+def build_materialization_completed_event():
     return {
         "status": "SUCCESS",
         "emitted_at": datetime.now(timezone.utc).isoformat(),
         "executed_queries": sql_files
     }
 
-def emit_ingestion_completed_event(detail: dict) -> None:
+def emit_materialization_completed_event(detail: dict) -> None:
     response = events_client.put_events(
         Entries=[
             {
-                "Source": "tutor.silver.ingestion", 
-                "DetailType": "IngestionCompleted",
+                "Source": "tutor.gold.materialization",
+                "DetailType": "MaterializationCompleted",
                 "Detail": json.dumps(detail),
-                "EventBusName": "default"
+                "EventBusName": "default" 
             }
         ]
     )
     entry = response["Entries"][0]
     if "ErrorCode" in entry:
         raise RuntimeError(
-            f"Failed to emit IngestionCompleted event: "
+            f"Failed to emit MaterializationCompleted event: "
             f"{entry['ErrorCode']} - {entry.get('ErrorMessage')}"
         )
 
 def lambda_handler(event, context):
-    LOGGER.info("Starting silver Athena ingestion")
+    LOGGER.info("Starting Athena gold materialization")
     try:    
 
         for sql_file in sql_files:
@@ -110,13 +104,13 @@ def lambda_handler(event, context):
             query_id = run_athena_query(sql)
             wait_for_query(query_id)
 
-        event_detail = build_ingestion_completed_event()
-        emit_ingestion_completed_event(event_detail)
+        event_detail = build_materialization_completed_event()
+        emit_materialization_completed_event(event_detail)
 
-        LOGGER.info("Silver layer ingestion completed successfully")
+        LOGGER.info("Gold layer materialization completed successfully")
 
         return event_detail
 
     except Exception:
-        LOGGER.exception("Silver layer ingestion failed")
+        LOGGER.exception("Gold layer materialization failed")
         raise
