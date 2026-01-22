@@ -70,7 +70,7 @@ The gold layer contains business-facing datasets optimized for BI tools and ad h
 • Subject demand trends
 • Revenue cycle
 
-Gold artifacts are materialized as Athena tables for maximum AWS comute cost optimization. These tables are queried by Looker at its maximum refresh cycle of 12 hours. 
+Gold artifacts are materialized as Athena tables for maximum AWS compute cost optimization. These tables are queried by Looker at its maximum refresh cycle of 12 hours. 
 
 ## Orchestration and Automation
 
