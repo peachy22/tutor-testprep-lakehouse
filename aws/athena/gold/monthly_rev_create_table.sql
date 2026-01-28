@@ -6,6 +6,7 @@ WITH (    table_type = 'ICEBERG',
 ) AS
 
 SELECT DATE_FORMAT(ses.session_date,'%M %Y') AS Month,
+       LAST_DAY_OF_MONTH(ses.session_date) AS EOMONTH,
        SUM(stu.contract_rate*ses.duration) AS Revenue,
        CONCAT(tut.last_name,', ',tut.first_name) AS Contractor,
        SUM(ses.duration) AS Hours,
@@ -16,4 +17,4 @@ INNER JOIN tutor_testprep_silver.dim_students stu on stu.student_id = ses.studen
 INNER JOIN tutor_testprep_silver.dim_tutors tut on tut.tutor_id = ses.tutor_id and tut.is_current = true
 INNER JOIN tutor_testprep_silver.dim_appt_status apt on apt.status_id = ses.status
 INNER JOIN tutor_testprep_silver.dim_subjects sub on sub.subject_id = ses.subject_id
-GROUP BY DATE_FORMAT(ses.session_date,'%M %Y'), sub.subject_name, CONCAT(tut.last_name,', ',tut.first_name)
+GROUP BY DATE_FORMAT(ses.session_date,'%M %Y'), sub.subject_name, CONCAT(tut.last_name,', ',tut.first_name), LAST_DAY_OF_MONTH(ses.session_date)
