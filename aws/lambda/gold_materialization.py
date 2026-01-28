@@ -23,7 +23,9 @@ SQL_PREFIX = "gold/sql/gold_materialization/"
 
 sql_files = [
            "active_students_drop_table.sql",
-            "active_students_create_table.sql"
+            "active_students_create_table.sql",
+            "monthly_rev_drop_table.sql",
+            "monthly_rev_create_table.sql"
         ]
 
 def run_athena_query(sql: str) -> str:
