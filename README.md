@@ -22,18 +22,18 @@ Processing is orchestrated via AWS Lambda and EventBridge, with Athena serving a
 
 The synthetic source data simulates a tutoring platform with:
 
-• Students (SCD2)\\
-• Tutors (SCD2)\\
+• Students (SCD2)  
+• Tutors (SCD2)  
 • Tutoring Sessions (Fact)
 
 Specific simulation behaviors and probabilities are documented in the .py files at src/utils. The key behaviors are as follows, based upon my real-world experience in the test prep domain:
 
-• The business primarily serves year-round standardized test preparation clients (e.g., SAT, PSAT)\\
-• Students schedule one session per week, with a certain probability to cancel each, either with sufficient notice (not billable) or not (billable)\\
-• Student churn is modeled by checking against a quit probability for each session that is scheduled to occur\\
-• Students will always churn at the beginning of summer (school work support) or after 120 days of test prep (standardized testing)\\
-• During the fall, students exhibit probability of returning for sessions provided they have not graduated yet\\
-• Tutors are contracted with flexible subject coverage, but are capped at a maximum active student load\\
+• The business primarily serves year-round standardized test preparation clients (e.g., SAT, PSAT)  
+• Students schedule one session per week, with a certain probability to cancel each, either with sufficient notice (not billable) or not (billable)  
+• Student churn is modeled by checking against a quit probability for each session that is scheduled to occur  
+• Students will always churn at the beginning of summer (school work support) or after 120 days of test prep (standardized testing)  
+• During the fall, students exhibit probability of returning for sessions provided they have not graduated yet  
+• Tutors are contracted with flexible subject coverage, but are capped at a maximum active student load  
 • Client and tutor onboarding rates are seasonal, peaking in the fall, in addition to increasing gradually overall as the business matures
 
 Prior to 2026-01-01, the data is modeled in a historical batch that represents the state of the business pre-migration to AWS. After that, data is batch simulated each day and SCD2-type tracking begins. This repo contains that initial simulated history in csv format.
@@ -44,30 +44,30 @@ The datasets which land in the raw zone are intentionally denormalized and imper
 
 The silver layer enforces data quality, typing, and relational integrity. Key tables include:
 
-• `dim_students` (SCD2)\\
-• `dim_tutors` (SCD2)\\
-• `dim_subjects`\\
-• `dim_appt_status`\\
+• `dim_students` (SCD2)  
+• `dim_tutors` (SCD2)  
+• `dim_subjects`  
+• `dim_appt_status`  
 • `fct_sessions`
 
 All identifiers are stable and suitable for dimensional joins. 
 
 Athena SQL ingests rows from raw staging in S3. New facts and dimensions are appended after normalization; dimension updates are merged. The normalization assumptions for session facts include:
 
-• Fill null rows with assumed default values\\
-    • The duration is 1 hour\\
-    • The subject is Standardized Test Prep\\
-• Double-digit durations are in minutes; convert to hours\\
-• Duplicate entries should take the most recent stamped row\\
+• Fill null rows with assumed default values  
+    • The duration is 1 hour  
+    • The subject is Standardized Test Prep  
+• Double-digit durations are in minutes; convert to hours  
+• Duplicate entries should take the most recent stamped row  
 • Set future session dates to the current sim date
 
 ### Gold Layer (Analytics Artifacts)
 
 The gold layer contains business-facing datasets optimized for BI tools and ad hoc analysis. Examples include:
 
-• Active students profiles\\
-• Contractor utilization\\
-• Subject demand trends\\
+• Active students profiles  
+• Contractor utilization  
+• Subject demand trends  
 • Revenue cycle
 
 Gold artifacts are materialized as Athena tables for maximum AWS compute cost optimization. These tables are queried by Looker at its maximum refresh cycle of 12 hours. 
@@ -76,20 +76,20 @@ Gold artifacts are materialized as Athena tables for maximum AWS compute cost op
 
 ### Event-Driven Ingestion
 
-• Lambda for raw session generation for the previous date occurs via Eventbridge scheduler at 1am each morning\\ 
-• Eventbridge custom event handler for Silver ingestion Lambda listents for successful raw loads\\
-• Eventbridge custom event handler for Gold materialization Lambda listents for successful silver ingests\\
+• Lambda for raw session generation for the previous date occurs via Eventbridge scheduler at 1am each morning  
+• Eventbridge custom event handler for Silver ingestion Lambda listens for successful raw loads  
+• Eventbridge custom event handler for Gold materialization Lambda listens for successful silver ingests  
 • Eventbridge custom event handler for Drive API Lambda listens for successful gold materializations
 
 ## Technologies Used
 
-• **AWS S3** – Data lake storage\\
-• **AWS Athena** – SQL query engine\\
-• **AWS Lambda** – Serverless transformations\\
-• **Amazon EventBridge** – Pipeline orchestration\\
-• **Python** – Data generation and transformation logic\\
-• **SQL** – Modeling and analytics\\
-• **Looker Studio** – BI visualization (downstream consumer)\\
+• **AWS S3** – Data lake storage  
+• **AWS Athena** – SQL query engine  
+• **AWS Lambda** – Serverless transformations  
+• **Amazon EventBridge** – Pipeline orchestration  
+• **Python** – Data generation and transformation logic  
+• **SQL** – Modeling and analytics  
+• **Looker Studio** – BI visualization (downstream consumer)  
 • **IAM** – Role-based permissions
 
 ## Project Structure
@@ -124,22 +124,22 @@ Gold artifacts are materialized as Athena tables for maximum AWS compute cost op
 
 This project is designed as a portfolio artifact demonstrating:
 
-• Practical data modeling\\
-• Cloud-native orchestration\\
-• Operations-oriented thinking\\
+• Practical data modeling  
+• Cloud-native orchestration  
+• Operations-oriented thinking  
 • Production-aligned engineering tradeoffs
 
 ## Future Enhancements
 
-• Corruption modes for simulated dimension tables\\
-• Data quality checks and expectations\\
-• CI validation of SQL artifacts\\
-• Migration to AWS Step Functions\\
-    • Robust AWS-native error handling and retry rules\\
-• Enhancements to simulation realism:\\
-    • Contractor churn\\
-    • College-level clients\\
-    • Client feedback / test score analytics\\
+• Corruption modes for simulated dimension tables  
+• Data quality checks and AI-powered governance  
+• CI validation of SQL artifacts  
+• Migration to AWS Step Functions  
+    • Robust AWS-native error handling and retry rules  
+• Enhancements to simulation realism:  
+    • Contractor churn  
+    • College-level clients  
+    • Client feedback / test score analytics  
     • Multiple sessions per week during finals / burst periods
 
 ## Disclaimer
