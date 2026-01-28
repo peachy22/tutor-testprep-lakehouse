@@ -10,8 +10,8 @@ The primary objective is to simulate raw transactional data, then translate that
 
 The pipeline follows a layered lakehouse architecture deployed on AWS-managed services:
 
-• **Raw (Bronze)** – Synthetic OLTP-style CSV data landed in S3c\\
-• **Silver** – Cleaned, conformed, and relationally consistent tables in Athena\\
+• **Raw (Bronze)** – Synthetic OLTP-style CSV data landed in S3c  
+• **Silver** – Cleaned, conformed, and relationally consistent tables in Athena  
 • **Gold** – Analytics-ready fact and dimension tables, plus business-facing aggregates
 
 Processing is orchestrated via AWS Lambda and EventBridge, with Athena serving as the SQL execution engine. While the core pipeline is AWS-native, curated gold-layer artifacts are exported to Google Cloud via the Drive API, decoupling analytical compute from downstream consumption. For higher-concurrency or latency-sensitive workloads, this architecture would naturally evolve toward a dedicated warehouse such as Redshift paired with an AWS-native enterprise BI tool like Quicksight; Athena + Looker is used here deliberately to emphasize cost efficiency, elasticity, and operational simplicity under moderate analytical load.
